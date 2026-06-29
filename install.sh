@@ -8,14 +8,38 @@
 #   ./install.sh --yes           # no prompts
 #
 set -euo pipefail
-KIT="$(cd "$(dirname "$0")" && pwd)"
-TARGET="$PWD"
-GLOBAL=0
-ASSUME_YES=0
+
+REPO="jzstur-dd/datadog-site-support-kit"
+BRANCH="main"
 
 ok()   { printf '  \033[32m✓\033[0m %s\n' "$*"; }
 step() { printf '\033[1m▸ %s\033[0m\n' "$*"; }
 warn() { printf '  \033[33m!\033[0m %s\n' "$*"; }
+
+# Bootstrap: when piped over curl (no kit files on disk) fetch the repo and
+# re-exec the real installer from the clone. Tries gh (handles private repos),
+# falls back to anonymous git clone (public repos).
+SELF_DIR="$(cd "$(dirname "$0")" 2>/dev/null && pwd || echo /nonexistent)"
+if [ ! -f "$SELF_DIR/.claude/skills/site-support-auditor/SKILL.md" ]; then
+  step "Fetching $REPO ..."
+  TMP="$(mktemp -d)"
+  if command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1 \
+       && gh repo clone "$REPO" "$TMP/kit" -- --depth 1 -q >/dev/null 2>&1; then
+    ok "cloned via gh"
+  elif git clone --depth 1 "https://github.com/$REPO" "$TMP/kit" -q 2>/dev/null; then
+    ok "cloned via git"
+  else
+    echo "error: could not fetch $REPO (private repo without access, or no network)." >&2
+    echo "  If private, ask Jackson for collaborator access, or: gh auth login" >&2
+    exit 1
+  fi
+  exec bash "$TMP/kit/install.sh" "$@"
+fi
+
+KIT="$SELF_DIR"
+TARGET="$PWD"
+GLOBAL=0
+ASSUME_YES=0
 
 while [ $# -gt 0 ]; do
   case "$1" in

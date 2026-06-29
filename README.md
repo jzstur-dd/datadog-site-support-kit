@@ -11,21 +11,20 @@ one failure that bites everyone — an AI declaring "no doc page exists" off a s
 failed search when the page is live (a human finds it instantly in the docs search
 box). See [The Gate](#the-gate).
 
-## Install (30 seconds)
+## Install (one command)
 
 ```bash
-git clone <repo-url> dd-site-support && cd dd-site-support
-./install.sh                 # into the current project's .claude/
-# or
-./install.sh --global        # into ~/.claude (available in every project)
+curl -fsSL https://raw.githubusercontent.com/jzstur-dd/datadog-site-support-kit/main/install.sh | bash -s -- --global
 ```
 
-Restart Claude Code. That's it. No pip install, no API keys — the helper is
-stdlib-only Python and talks only to the **public** docs site and the **public**
-docs repo.
+That's the whole thing. Restart Claude Code and it's available in every project.
+No pip install, no API keys, no clone — the installer fetches itself, and the
+helper is stdlib-only Python that talks only to the **public** docs site and the
+**public** docs repo.
 
-Prefer manual? Copy `.claude/skills/site-support-auditor/` into your project's
-`.claude/skills/` and `.claude/commands/site-support.md` into `.claude/commands/`.
+Drop `--global` to install into the current project's `.claude/` instead. Prefer to
+clone first? `git clone https://github.com/jzstur-dd/datadog-site-support-kit &&
+./datadog-site-support-kit/install.sh --global`.
 
 ## Use it
 
